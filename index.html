@@ -1,24 +1,163 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cybersecurity Quiz</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      padding: 2rem;
+    }
+    .quiz-container {
+      background: white;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    .question { font-weight: bold; margin-bottom: 1rem; }
+    .option { margin-bottom: 0.5rem; }
+    .btn { margin-top: 1rem; }
+    .lang-select {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Cybersecurity Quiz</h1>
-    <div id="language-switch">
-      <button onclick="setLanguage('en')">EN</button>
-      <button onclick="setLanguage('ru')">RU</button>
-      <button onclick="setLanguage('kg')">KG</button>
-    </div>
-    <div id="quiz-container"></div>
-    <button id="submit-btn" onclick="submitQuiz()">Submit</button>
-    <div id="result"></div>
+  <div class="lang-select">
+    <label for="language">🌐 Choose language / Выберите язык / Тилди тандаңыз:</label>
+    <select id="language" onchange="setLanguage()">
+      <option value="en">🇬🇧 English</option>
+      <option value="ru">🇷🇺 Русский</option>
+      <option value="kg">🇰🇬 Кыргызча</option>
+    </select>
   </div>
-  <script src="script.js"></script>
+
+  <div class="quiz-container" id="quiz">
+    <div class="question" id="questionText"></div>
+    <div id="options"></div>
+    <button class="btn" onclick="nextQuestion()">Next / Далее / Кийинки</button>
+    <div id="explanation" style="margin-top:1rem;"></div>
+  </div>
+
+  <script>
+    const quizData = {
+      en: [
+        {
+          q: "What does 'phishing' mean?",
+          options: ["Fishing online", "Scamming to steal data", "Securing a system", "Encrypting files"],
+          answer: 1,
+          hint: "It's a type of cyberattack via email or messages.",
+          explanation: "Phishing is when attackers trick you into giving personal information by pretending to be someone trustworthy."
+        },
+        {
+          q: "What is a strong password?",
+          options: ["123456", "password", "Your name", "A mix of letters, numbers, and symbols"],
+          answer: 3,
+          hint: "It should be hard to guess.",
+          explanation: "A strong password includes uppercase, lowercase, numbers, and symbols."
+        },
+        // ... Add 8 more questions here
+      ],
+      ru: [
+        {
+          q: "Что такое фишинг?",
+          options: ["Рыбалка в интернете", "Мошенничество для кражи данных", "Защита системы", "Шифрование файлов"],
+          answer: 1,
+          hint: "Тип кибератаки через email или сообщения.",
+          explanation: "Фишинг — это когда злоумышленники выдают себя за доверенное лицо, чтобы украсть ваши данные."
+        },
+        {
+          q: "Какой пароль считается надёжным?",
+          options: ["123456", "password", "Ваше имя", "Смешение букв, цифр и символов"],
+          answer: 3,
+          hint: "Должен быть сложным для угадывания.",
+          explanation: "Надёжный пароль содержит заглавные и строчные буквы, цифры и символы."
+        },
+        // ... Add 8 more questions here
+      ],
+      kg: [
+        {
+          q: "Фишинг деген эмне?",
+          options: ["Интернетте балык уулоо", "Маалыматты алдоо менен уурдоо", "Системаны коргоо", "Файлдарды шифрлөө"],
+          answer: 1,
+          hint: "Электрондук кат же билдирүү аркылуу болгон чабуул.",
+          explanation: "Фишинг — бул алдамчылык жолу менен жеке маалыматтарды алуу."
+        },
+        {
+          q: "Кайсы сырсөз күчтүү деп эсептелет?",
+          options: ["123456", "password", "Атыңыз", "Тамгалар, сандар жана белгилер аралашкан"],
+          answer: 3,
+          hint: "Болжолдоо кыйын болушу керек.",
+          explanation: "Күчтүү сырсөз — бул ар кандай символдордон турган сырсөз."
+        },
+        // ... Add 8 more questions here
+      ]
+    };
+
+    let lang = "en";
+    let current = 0;
+    let score = 0;
+
+    function setLanguage() {
+      lang = document.getElementById("language").value;
+      current = 0;
+      score = 0;
+      document.getElementById("explanation").innerText = "";
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = quizData[lang][current];
+      document.getElementById("questionText").innerText = q.q;
+
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.classList.add("option");
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(i);
+        optionsDiv.appendChild(btn);
+        optionsDiv.appendChild(document.createElement("br"));
+      });
+
+      document.getElementById("explanation").innerText = "💡 Hint / Подсказка / Кеңеш: " + q.hint;
+    }
+
+    function checkAnswer(selected) {
+      const q = quizData[lang][current];
+      const explanation = document.getElementById("explanation");
+
+      if (selected === q.answer) {
+        explanation.innerText = "✅ Correct! / Верно! / Туура!\n\nℹ️ " + q.explanation;
+        score++;
+      } else {
+        explanation.innerText = "❌ Wrong! / Неверно! / Туура эмес!\n\nℹ️ " + q.explanation;
+      }
+
+      const buttons = document.querySelectorAll(".option");
+      buttons.forEach(btn => btn.disabled = true);
+    }
+
+    function nextQuestion() {
+      current++;
+      if (current < quizData[lang].length) {
+        showQuestion();
+      } else {
+        document.getElementById("quiz").innerHTML = `<h2>🎉 ${score}/${quizData[lang].length} — ${
+          lang === "en" ? "Your score" : lang === "ru" ? "Ваш результат" : "Сиздин жыйынтык"
+        }</h2>`;
+      }
+    }
+
+    // Load first question
+    setLanguage();
+  </script>
 </body>
 </html>
